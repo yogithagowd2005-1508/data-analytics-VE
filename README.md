@@ -119,7 +119,7 @@ Over a structured 25-day product analytics methodology, this project establishes
    - Negative control audit on `Messy_Data` successfully detected and quarantined **45 orphan rows** across 10 distinct non-existent user IDs.
    - Comprehensive documentation in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/20_IMPLEMENTATION_BACKLOG.csv.
 5. **Rigorous KPI Verification (All 35 KPIs Audited)**:
-   - Full mathematical and empirical audit across 7 business domains documented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.md and [kpi_verification_report.csv](data/kpi_verification_report.csv).
+   - Full mathematical and empirical audit across 7 business domains documented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.md and https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/kpi_verification_report.csv.
    - **24 KPIs** calculated directly from simulated tables.
    - **11 KPIs** verified as mathematically sound specifications, with 2 upstream tracking dependencies identified for live deployment (Net Ad Revenue ARPU requires ad network revenue API; Multi-Account Collusion requires hardware device fingerprinting).
 6. **Live Dashboard Suite & Visual Evidence**:
