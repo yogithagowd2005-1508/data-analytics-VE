@@ -124,7 +124,7 @@ Over a structured 25-day product analytics methodology, this project establishes
    - **11 KPIs** verified as mathematically sound specifications, with 2 upstream tracking dependencies identified for live deployment (Net Ad Revenue ARPU requires ad network revenue API; Multi-Account Collusion requires hardware device fingerprinting).
 6. **Live Dashboard Suite & Visual Evidence**:
    - Complete interactive multi-tab BI suite available at https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/index.html.
-   - 7 high-resolution PNG screenshot renders available in [dashboards/screenshots/](dashboards/screenshots.
+   - 7 high-resolution PNG screenshot renders available in PRODUCTION BI DASHBOARD SUITE & VISUAL GALLERY.
 7. **Practical Platform Integration & Realistic Cost Breakdown**:
    - Complete technical engineering guide provided in [PRACTICAL_INTEGRATION_PLAYBOOK.md](docs/PRACTICAL_INTEGRATION_PLAYBOOK.md), including Android Kotlin, iOS Swift, and TypeScript SDK wrappers, FastAPI Ingestion Gateway with Redis idempotency, dbt Core Medallion staging models, and Metabase BI integration.
    - Realistic tiered infrastructure cost model: **\$115/month** (MVP / Dev, <50k DAU) $\rightarrow$ **\$385/month** (Growth, 50k–250k DAU) $\rightarrow$ **\$1,150/month** (Scale, 250k–1M+ DAU).
