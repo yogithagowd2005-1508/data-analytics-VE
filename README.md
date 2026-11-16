@@ -184,7 +184,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_6_
 ---
 
 ### 7. Referrals & Viral Growth Funnel Dashboard
-
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_7_referrals.png
 * **Target Audience**: Growth Lead, Virality Strategist
 * **Key Metrics**: Invite Links Generated (`900`), Signup Rate (`84.4%`), Activation Rate (`73.7%`), Viral Coefficient ($K = 0.56$)
 * **Visuals**: 4-Stage Referral Funnel (`900` links $\rightarrow$ `760` signups $\rightarrow$ `560` activations $\rightarrow$ `370` bounties), Social Share Attribution, Top Advocates Leaderboard
