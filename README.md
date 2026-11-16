@@ -117,7 +117,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 4. **Empirical Relationship & Referential Testing (9 FK Paths)**:
    - Validated all **9 foreign-key paths** across 30,150 total records (34,597 referential checks). **100% clean referential integrity** (0 orphans) achieved across all production-simulated tables.
    - Negative control audit on `Messy_Data` successfully detected and quarantined **45 orphan rows** across 10 distinct non-existent user IDs.
-   - Comprehensive documentation in [FOREIGN_KEY_VALIDATION_REPORT.md](docs/FOREIGN_KEY_VALIDATION_REPORT.md).
+   - Comprehensive documentation in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/20_IMPLEMENTATION_BACKLOG.csv.
 5. **Rigorous KPI Verification (All 35 KPIs Audited)**:
    - Full mathematical and empirical audit across 7 business domains documented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.md and [kpi_verification_report.csv](data/kpi_verification_report.csv).
    - **24 KPIs** calculated directly from simulated tables.
