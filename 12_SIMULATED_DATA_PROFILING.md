@@ -6,7 +6,7 @@
 ---
 
 ## 1. Executive Summary & Profiling Methodology
-The **Simulated Data Profiling Report (Work Package J)** executes an automated empirical evaluation across all 8 datasets in the simulated data pack (`Users`, `Task_Activity`, `Rewards`, `Wallet`, `Withdrawals`, `Referrals`, `Feature_Events`, and `Messy_Data`). Totaling **29,150 synthetic records**, this profiling evaluates statistical distributions, primary/foreign key integrity, and the practical calculability of business KPIs.
+The **Simulated Data Profiling Report (Work Package J)** executes an automated empirical evaluation across all 8 datasets in the simulated data pack (`Users`, `Task_Activity`, `Rewards`, `Wallet`, `Withdrawals`, `Referrals`, `Feature_Events`, and `Messy_Data`). Totaling **30,150 synthetic records**, this profiling evaluates statistical distributions, primary/foreign key integrity, and the practical calculability of business KPIs.
 
 - **Automated Profiling Engine**: `scripts/profile_simulated_data.py`
 - **Output Artifacts**:
@@ -34,7 +34,7 @@ The **Simulated Data Profiling Report (Work Package J)** executes an automated e
 | Feature_Events   | 12,000  | 8       | event_id         | 12,000     | 0 (0.0%)       | 0             | Jan - Oct 2026|
 | Messy_Data       | 550     | 9       | record_id        | 550        | 0 (0.0%)       | 157           | May - Aug 2026|
 +------------------+---------+---------+------------------+------------+----------------+---------------+---------------+
-| TOTAL PORTFOLIO  | 29,150  | 82      | 8 Entities       | 29,150     | 0 (Clean Core) | 14,500        | 10 Months     |
+| TOTAL PORTFOLIO  | 30,150  | 82      | 8 Entities       | 30,150     | 0 (Clean Core) | 18,502        | 10 Months     |
 +------------------+---------+---------+------------------+------------+----------------+---------------+---------------+
 ```
 

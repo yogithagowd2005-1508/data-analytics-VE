@@ -33,7 +33,7 @@ Every deliverable mandated by the Task 01 specification has been fully authored,
 | 09  | VELOOP Data Dictionary                | docs/09_*.md        | deliverables_tables/09_DATA_DICTIONARY (92)  |
 | 10  | Logical Data Model & ER Diagram       | docs/10_*.md        | Mermaid ER diagram & 3NF/Star models         |
 | 11  | VELOOP KPI Catalogue                  | docs/11_*.md        | deliverables_tables/11_KPI_CATALOGUE (35 KPIs|
-| 12  | Simulated Data Profiling Report       | docs/12_*.md        | data/profiling_summary.csv (29,150 rows)     |
+| 12  | Simulated Data Profiling Report       | docs/12_*.md        | data/profiling_summary.csv (30,150 rows)     |
 | 13  | Data Quality Audit & Control Model    | docs/13_*.md        | data/data_quality_issue_log.csv (14 defects) |
 | 14  | Analytics Dashboard Blueprint         | docs/14_*.md        | 7 production dashboard wireframes & specs    |
 | 15  | Developer Analytics Handoff           | docs/15_*.md        | Engineering specs & acceptance test criteria |
