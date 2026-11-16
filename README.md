@@ -144,7 +144,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_1_
 ---
 
 ### 2. User Analytics & Lifecycle Dashboard
-![User Analytics Dashboard](dashboards/screenshots/dashboard_2_user_analytics.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_2_user_analytics.png
 * **Target Audience**: Growth Product Manager, User Acquisition Lead
 * **Key Metrics**: Total Registrations (`1,000`), Onboarding Completion (`81.7%`), Day 7 Retention (`24.5%`), Dormancy (`24.0%`)
 * **Visuals**: Acquisition Channel Yield (Organic vs Referral vs Paid Ads), Geographic Breakdown (US 30%, IN 18%, GB 15%), Lifecycle State Funnel
