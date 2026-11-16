@@ -34,7 +34,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 │   ├── 13_DATA_QUALITY_AUDIT.md                       <- 13: Data Quality Audit (14 Anomaly Classes)
 │   ├── 14_DASHBOARD_BLUEPRINT.md                      <- 14: 7 Production Dashboard Wireframes & Specs
 │   ├── 15_DEVELOPER_ANALYTICS_HANDOFF.md              <- 15: Engineering Event Payloads & Acceptance Tests
-│   ├── 16_DATA_PIPELINE_PROPOSAL.md                   <- 16: Practical Medallion Data Pipeline ($150/mo)
+│   ├── 16_DATA_PIPELINE_PROPOSAL.md                   <- 16: Practical Medallion Data Pipeline ($115/mo)
 │   ├── 17_PRIVACY_GOVERNANCE_PROPOSAL.md              <- 17: 5-Tier RBAC Access Model & Zero-PII Policy
 │   ├── 18_ANALYTICS_READINESS_ASSESSMENT.md           <- 18: 10-Dimension Readiness Scorecard (73.8% B+)
 │   ├── 19_ASSUMPTION_VERIFICATION_REGISTER.md         <- 19: Assumption & Verification Register (10 Unknowns)
@@ -117,17 +117,77 @@ Over a structured 25-day product analytics methodology, this project establishes
 4. **Empirical Relationship & Referential Testing (9 FK Paths)**:
    - Validated all **9 foreign-key paths** across 30,150 total records (34,597 referential checks). **100% clean referential integrity** (0 orphans) achieved across all production-simulated tables.
    - Negative control audit on `Messy_Data` successfully detected and quarantined **45 orphan rows** across 10 distinct non-existent user IDs.
-   - Comprehensive documentation in [FOREIGN_KEY_VALIDATION_REPORT.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/FOREIGN_KEY_VALIDATION_REPORT.md).
+   - Comprehensive documentation in [FOREIGN_KEY_VALIDATION_REPORT.md](docs/FOREIGN_KEY_VALIDATION_REPORT.md).
 5. **Rigorous KPI Verification (All 35 KPIs Audited)**:
-   - Full mathematical and empirical audit across 7 business domains documented in [KPI_CATALOGUE.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/11_KPI_CATALOGUE.md) and [kpi_verification_report.csv](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/data/kpi_verification_report.csv).
+   - Full mathematical and empirical audit across 7 business domains documented in [KPI_CATALOGUE.md](docs/11_KPI_CATALOGUE.md) and [kpi_verification_report.csv](data/kpi_verification_report.csv).
    - **24 KPIs** calculated directly from simulated tables.
    - **11 KPIs** verified as mathematically sound specifications, with 2 upstream tracking dependencies identified for live deployment (Net Ad Revenue ARPU requires ad network revenue API; Multi-Account Collusion requires hardware device fingerprinting).
 6. **Live Dashboard Suite & Visual Evidence**:
-   - Complete interactive multi-tab BI suite available at [dashboards/index.html](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/dashboards/index.html).
-   - 7 high-resolution PNG screenshot renders available in [dashboards/screenshots/](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/dashboards/screenshots/).
+   - Complete interactive multi-tab BI suite available at [dashboards/index.html](dashboards/index.html).
+   - 7 high-resolution PNG screenshot renders available in [dashboards/screenshots/](dashboards/screenshots/).
 7. **Practical Platform Integration & Realistic Cost Breakdown**:
-   - Complete technical engineering guide provided in [PRACTICAL_INTEGRATION_PLAYBOOK.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/PRACTICAL_INTEGRATION_PLAYBOOK.md), including Android Kotlin, iOS Swift, and TypeScript SDK wrappers, FastAPI Ingestion Gateway with Redis idempotency, dbt Core Medallion staging models, and Metabase BI integration.
+   - Complete technical engineering guide provided in [PRACTICAL_INTEGRATION_PLAYBOOK.md](docs/PRACTICAL_INTEGRATION_PLAYBOOK.md), including Android Kotlin, iOS Swift, and TypeScript SDK wrappers, FastAPI Ingestion Gateway with Redis idempotency, dbt Core Medallion staging models, and Metabase BI integration.
    - Realistic tiered infrastructure cost model: **\$115/month** (MVP / Dev, <50k DAU) $\rightarrow$ **\$385/month** (Growth, 50k–250k DAU) $\rightarrow$ **\$1,150/month** (Scale, 250k–1M+ DAU).
+
+---
+
+## 📊 Production BI Dashboard Suite & Visual Gallery
+
+The analytical blueprint includes seven fully designed, interactive BI dashboards implemented in [dashboards/index.html](dashboards/index.html) and compiled into high-resolution visual evidence artifacts below:
+
+### 1. Executive Overview Dashboard
+![Executive Overview Dashboard](dashboards/screenshots/dashboard_1_executive_overview.png)
+* **Target Audience**: C-Suite, Founders, Operations Lead
+* **Key Metrics**: DAU (`1,420`), WAU (`4,850`), Settlement SLA (`74.0%` settled <48h), Turnaround SLA (`26.4h`)
+* **Visuals**: 30-Day Activity Trends, Influx vs. Outflow Area Chart, Donut of Payout Channels (PayPal 45%, Crypto 28%, Amazon 18%, Bank 9%)
+
+---
+
+### 2. User Analytics & Lifecycle Dashboard
+![User Analytics Dashboard](dashboards/screenshots/dashboard_2_user_analytics.png)
+* **Target Audience**: Growth Product Manager, User Acquisition Lead
+* **Key Metrics**: Total Registrations (`1,000`), Onboarding Completion (`81.7%`), Day 7 Retention (`24.5%`), Dormancy (`24.0%`)
+* **Visuals**: Acquisition Channel Yield (Organic vs Referral vs Paid Ads), Geographic Breakdown (US 30%, IN 18%, GB 15%), Lifecycle State Funnel
+
+---
+
+### 3. Engagement & Gamification Dashboard
+![Engagement Dashboard](dashboards/screenshots/dashboard_3_engagement.png)
+* **Target Audience**: Gamification PM, Game Economy Designer
+* **Key Metrics**: Started Tasks (`6,000`), Completion Rate (`72.6%`), Daily Streak Claims (`2,666`), Spin Frequency (`2.00` spins/user)
+* **Visuals**: Earning Feature Category Breakdown (Video Ads, Surveys, Tap & Earn, Mining), Hourly Engagement Heatmap, Abandonment Taxonomy
+
+---
+
+### 4. Rewards & Liability Management Dashboard
+![Rewards Dashboard](dashboards/screenshots/dashboard_4_rewards.png)
+* **Target Audience**: CFO, Product Economist, Treasury Operations
+* **Key Metrics**: Gross Points Issued (`407,760 VEs`), Reversal Rate (`3.20%`), Escrow Holding Buffer (`4.31%`), Avg Reward / Task (`84.12 VEs`)
+* **Visuals**: Daily Issuance vs. Reversal Bars, Multi-Unit Distribution (VEs, XP, Gems), Feature Liability Yield Matrix
+
+---
+
+### 5. Multi-Currency Wallet & Ledger Dashboard
+![Wallet Ledger Dashboard](dashboards/screenshots/dashboard_5_wallet.png)
+* **Target Audience**: Financial Controller, Ledger Architecture Team
+* **Key Metrics**: Circulating Supply (`-1,447,330 VEs` net balance), Double-Entry Lines (`3,500`), Reserve Coverage (`100.0%`)
+* **Visuals**: Ledger Flow Influx vs. Redemption Debits, User Balance Distribution Percentiles (P50, P90, P99), 36 Reversal Pair Audit Log
+
+---
+
+### 6. Withdrawals & Cash-Out Operations Dashboard
+![Withdrawals Dashboard](dashboards/screenshots/dashboard_6_withdrawals.png)
+* **Target Audience**: Payment Operations, Risk & Compliance Team
+* **Key Metrics**: Fulfillment Rate (`73.5%`), Pending Review Queue (`125`), Mean Turnaround SLA (`37.7h`), Rejection Rate (`13.7%`)
+* **Visuals**: Payout TAT Duration Histogram, Rejection Reason Breakdown (Provider Error, Account Mismatch, Threshold, Fraud), Real-time Queue Monitor
+
+---
+
+### 7. Referrals & Viral Growth Funnel Dashboard
+![Referrals Dashboard](dashboards/screenshots/dashboard_7_referrals.png)
+* **Target Audience**: Growth Lead, Virality Strategist
+* **Key Metrics**: Invite Links Generated (`900`), Signup Rate (`84.4%`), Activation Rate (`73.7%`), Viral Coefficient ($K = 0.56$)
+* **Visuals**: 4-Stage Referral Funnel (`900` links $\rightarrow$ `760` signups $\rightarrow$ `560` activations $\rightarrow$ `370` bounties), Social Share Attribution, Top Advocates Leaderboard
 
 ---
 
@@ -148,10 +208,13 @@ python scripts/audit_data_quality.py
 # 4. Verify all 35 KPIs (empirical calculations & specification audits)
 python scripts/verify_all_kpis.py
 
-# 5. Render high-resolution PNG screenshots of all 7 dashboards
+# 5. Run wallet double-entry ledger & withdrawal reconciliation tests
+python scripts/validate_wallet_reconciliation.py
+
+# 6. Render high-resolution PNG screenshots of all 7 dashboards
 python scripts/render_dashboard_screenshots.py
 
-# 6. Export all master workbooks and CSV specification tables
+# 7. Export all master workbooks and CSV specification tables
 python scripts/generate_all_workbooks.py
 ```
 
