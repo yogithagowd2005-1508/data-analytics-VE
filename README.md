@@ -168,7 +168,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_4_
 ---
 
 ### 5. Multi-Currency Wallet & Ledger Dashboard
-![Wallet Ledger Dashboard](dashboards/screenshots/dashboard_5_wallet.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_5_wallet.png
 * **Target Audience**: Financial Controller, Ledger Architecture Team
 * **Key Metrics**: Circulating Supply (`-1,447,330 VEs` net balance), Double-Entry Lines (`3,500`), Reserve Coverage (`100.0%`)
 * **Visuals**: Ledger Flow Influx vs. Redemption Debits, User Balance Distribution Percentiles (P50, P90, P99), 36 Reversal Pair Audit Log
@@ -176,7 +176,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_4_
 ---
 
 ### 6. Withdrawals & Cash-Out Operations Dashboard
-![Withdrawals Dashboard](dashboards/screenshots/dashboard_6_withdrawals.png)
+
 * **Target Audience**: Payment Operations, Risk & Compliance Team
 * **Key Metrics**: Fulfillment Rate (`73.5%`), Pending Review Queue (`125`), Mean Turnaround SLA (`37.7h`), Rejection Rate (`13.7%`)
 * **Visuals**: Payout TAT Duration Histogram, Rejection Reason Breakdown (Provider Error, Account Mismatch, Threshold, Fraud), Real-time Queue Monitor
