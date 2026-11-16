@@ -176,7 +176,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_5_
 ---
 
 ### 6. Withdrawals & Cash-Out Operations Dashboard
-
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_6_withdrawals.png
 * **Target Audience**: Payment Operations, Risk & Compliance Team
 * **Key Metrics**: Fulfillment Rate (`73.5%`), Pending Review Queue (`125`), Mean Turnaround SLA (`37.7h`), Rejection Rate (`13.7%`)
 * **Visuals**: Payout TAT Duration Histogram, Rejection Reason Breakdown (Provider Error, Account Mismatch, Threshold, Fraud), Real-time Queue Monitor
@@ -184,7 +184,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_5_
 ---
 
 ### 7. Referrals & Viral Growth Funnel Dashboard
-![Referrals Dashboard](dashboards/screenshots/dashboard_7_referrals.png)
+
 * **Target Audience**: Growth Lead, Virality Strategist
 * **Key Metrics**: Invite Links Generated (`900`), Signup Rate (`84.4%`), Activation Rate (`73.7%`), Viral Coefficient ($K = 0.56$)
 * **Visuals**: 4-Stage Referral Funnel (`900` links $\rightarrow$ `760` signups $\rightarrow$ `560` activations $\rightarrow$ `370` bounties), Social Share Attribution, Top Advocates Leaderboard
