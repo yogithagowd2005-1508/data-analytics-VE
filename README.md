@@ -160,7 +160,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_
 ---
 
 ### 4. Rewards & Liability Management Dashboard
-![Rewards Dashboard](dashboards/screenshots/dashboard_4_rewards.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_4_rewards.png
 * **Target Audience**: CFO, Product Economist, Treasury Operations
 * **Key Metrics**: Gross Points Issued (`407,760 VEs`), Reversal Rate (`3.20%`), Escrow Holding Buffer (`4.31%`), Avg Reward / Task (`84.12 VEs`)
 * **Visuals**: Daily Issuance vs. Reversal Bars, Multi-Unit Distribution (VEs, XP, Gems), Feature Liability Yield Matrix
