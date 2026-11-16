@@ -51,7 +51,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 │   ├── 19_ASSUMPTION_VERIFICATION_REGISTER.csv        <- 10 High-Risk Unknowns
 │   └── 20_IMPLEMENTATION_BACKLOG.csv                  <- 12 Prioritized Technical Epics
 │
-├── data/                                              <- Simulated Datasets (29,150 Records)
+├── data/                                              <- Simulated Datasets (30,150 Records)
 │   ├── VELOOP_Simulated_Datasets.xlsx                 <- All 8 simulated sheets in one multi-tab Excel file
 │   ├── Users.csv                                      <- 1,000 User Records
 │   ├── Task_Activity.csv                              <- 6,000 Earning Task Records
@@ -62,14 +62,28 @@ Over a structured 25-day product analytics methodology, this project establishes
 │   ├── Feature_Events.csv                             <- 12,000 Telemetry Activity Events
 │   ├── Messy_Data.csv                                 <- 550 Records with 14 Deliberate Quality Anomalies
 │   ├── profiling_summary.csv                          <- Automated Statistical Profiling Output
-│   ├── referential_integrity_test_results.csv         <- Foreign Key Relationship Validation Results
+│   ├── referential_integrity_test_results.csv         <- Foreign Key Relationship Validation Results (9 paths)
 │   ├── kpi_calculability_test.csv                     <- Empirical KPI Calculability Assessment
+│   ├── kpi_verification_report.csv                    <- Rigorous Audit & Calculation of all 35 KPIs
 │   └── data_quality_issue_log.csv                     <- Forensic Log of 14 Data Quality Defect Classes
 │
+├── dashboards/                                        <- Production BI Suite Evidence
+│   ├── index.html                                     <- Live Interactive Multi-Tab HTML Analytics Dashboard
+│   └── screenshots/                                   <- High-Resolution Visual Renders (7 Dashboards)
+│       ├── dashboard_1_executive_overview.png
+│       ├── dashboard_2_user_analytics.png
+│       ├── dashboard_3_engagement.png
+│       ├── dashboard_4_rewards.png
+│       ├── dashboard_5_wallet.png
+│       ├── dashboard_6_withdrawals.png
+│       └── dashboard_7_referrals.png
+│
 └── scripts/                                           <- Automated Python Engines
-    ├── generate_simulated_data.py                     <- Synthetic Data Generator (Seed=42)
+    ├── generate_simulated_data.py                     <- Synthetic Data Generator (Seed=42, 30,150 rows)
     ├── profile_simulated_data.py                      <- Statistical Profiling & Referential Integrity Tester
-    ├── audit_data_quality.py                          <- Forensic Data Quality Auditor for Messy_Data
+    ├── audit_data_quality.py                          <- Forensic Data Quality Auditor for Messy_Data (14 classes)
+    ├── verify_all_kpis.py                             <- Complete Verification & Calculation of all 35 KPIs
+    ├── render_dashboard_screenshots.py                <- Headless High-Res Dashboard Screenshot Renderer
     └── generate_all_workbooks.py                      <- Master Spreadsheet & CSV Export Engine
 ```
 
@@ -83,31 +97,61 @@ Over a structured 25-day product analytics methodology, this project establishes
    - **Data Dictionary**: **92 fields** documented (target was 75+ fields).
    - **KPI Catalogue**: **35 KPIs** documented across 7 domains (target was 30+ KPIs).
    - **Event Tracking Plan**: **30 standardized events** using the `domain_object_action` naming convention with complete 16-attribute schemas.
-3. **Forensic Data Quality Audit**:
-   - Identified and isolated all **14 anomaly categories** in `Messy_Data` (duplicates, null IDs, missing timestamps, malformed dates, invalid statuses, trailing spaces, invalid numeric strings, negative values, orphan records, rapid-burst double clicks, inconsistent naming, impossible state transitions).
+3. **Forensic Data Quality Audit (All 14 Anomaly Categories)**:
+   - Identified, isolated, and quantified all **14 anomaly categories** in `Messy_Data` (550 records, 577 defect hits):
+     1. *Duplicate Records / IDs* (140 affected rows)
+     2. *Missing User IDs* (25 affected rows with null `user_id`)
+     3. *Missing Event Timestamps* (34 affected rows with blank `timestamp`)
+     4. *Malformed Date Strings* (26 affected rows failing ISO 8601 parsing)
+     5. *Invalid Status Enums* (84 affected rows with unapproved statuses)
+     6. **Inconsistent Capitalization** *(Explicitly cataloged: 35 rows with mixed casing e.g. `cOmPLeTeD`, `pEnDiNg`)*
+     7. *Trailing / Leading Whitespace* (35 affected rows with padding spaces)
+     8. *Invalid Numeric Strings* (22 affected rows with text in numeric fields)
+     9. *Negative Amounts in Inappropriate Contexts* (30 affected rows)
+     10. **Unexpected Nulls in Mandatory Columns** *(Explicitly cataloged: 30 rows missing non-nullable `event_name`, `platform`, `category`)*
+     11. *Orphan Foreign Key Records* (45 affected rows referencing non-existent parent users)
+     12. *Rapid-Burst Duplicate Taps / Double-Clicks* (40 affected rows within <200ms)
+     13. *Inconsistent Event Naming Standards* (40 affected rows violating schema)
+     14. *Impossible State Transitions* (40 affected rows with inverted chronology)
    - Designed a permanent **Six-Layer Data Quality Control Framework** (Application $\rightarrow$ Gateway $\rightarrow$ Bronze $\rightarrow$ Silver $\rightarrow$ Gold $\rightarrow$ Dashboard).
-4. **Empirical Relationship & Referential Testing**:
-   - Tested 9 foreign key paths across 29,150 records; verified 100% clean referential integrity in core tables and isolated 80 orphan references in `Messy_Data`.
-5. **Practical, Cost-Effective Architecture**:
-   - Avoided enterprise bloat by designing an open-source Medallion architecture (FastAPI + Redis + MinIO/S3 + dbt Core + DuckDB/PostgreSQL + Metabase) that operates at under \$150/month during current development phases.
+4. **Empirical Relationship & Referential Testing (9 FK Paths)**:
+   - Validated all **9 foreign-key paths** across 30,150 total records (34,597 referential checks). **100% clean referential integrity** (0 orphans) achieved across all production-simulated tables.
+   - Negative control audit on `Messy_Data` successfully detected and quarantined **45 orphan rows** across 10 distinct non-existent user IDs.
+   - Comprehensive documentation in [FOREIGN_KEY_VALIDATION_REPORT.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/FOREIGN_KEY_VALIDATION_REPORT.md).
+5. **Rigorous KPI Verification (All 35 KPIs Audited)**:
+   - Full mathematical and empirical audit across 7 business domains documented in [KPI_CATALOGUE.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/11_KPI_CATALOGUE.md) and [kpi_verification_report.csv](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/data/kpi_verification_report.csv).
+   - **24 KPIs** calculated directly from simulated tables.
+   - **11 KPIs** verified as mathematically sound specifications, with 2 upstream tracking dependencies identified for live deployment (Net Ad Revenue ARPU requires ad network revenue API; Multi-Account Collusion requires hardware device fingerprinting).
+6. **Live Dashboard Suite & Visual Evidence**:
+   - Complete interactive multi-tab BI suite available at [dashboards/index.html](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/dashboards/index.html).
+   - 7 high-resolution PNG screenshot renders available in [dashboards/screenshots/](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/dashboards/screenshots/).
+7. **Practical Platform Integration & Realistic Cost Breakdown**:
+   - Complete technical engineering guide provided in [PRACTICAL_INTEGRATION_PLAYBOOK.md](file:///c:/Users/yyogi/OneDrive/Desktop/yogitha/data%20analytics%20VE/docs/PRACTICAL_INTEGRATION_PLAYBOOK.md), including Android Kotlin, iOS Swift, and TypeScript SDK wrappers, FastAPI Ingestion Gateway with Redis idempotency, dbt Core Medallion staging models, and Metabase BI integration.
+   - Realistic tiered infrastructure cost model: **\$115/month** (MVP / Dev, <50k DAU) $\rightarrow$ **\$385/month** (Growth, 50k–250k DAU) $\rightarrow$ **\$1,150/month** (Scale, 250k–1M+ DAU).
 
 ---
 
 ## 🛠️ How to Reproduce & Run the Analysis
 
-All profiling, data generation, and audit scripts are fully automated and reproducible using standard Python:
+All profiling, data generation, KPI verification, screenshot rendering, and audit scripts are fully automated and reproducible using standard Python:
 
 ```bash
-# 1. Regenerate all simulated datasets (29,150 rows)
+# 1. Regenerate all simulated datasets (30,150 rows across 8 entities)
 python scripts/generate_simulated_data.py
 
-# 2. Run statistical profiling and referential integrity testing
+# 2. Run statistical profiling and 9-path referential integrity testing
 python scripts/profile_simulated_data.py
 
-# 3. Run forensic data quality audit on Messy_Data
+# 3. Run forensic data quality audit on Messy_Data (14 anomaly classes)
 python scripts/audit_data_quality.py
 
-# 4. Export all master workbooks and CSV specification tables
+# 4. Verify all 35 KPIs (empirical calculations & specification audits)
+python scripts/verify_all_kpis.py
+
+# 5. Render high-resolution PNG screenshots of all 7 dashboards
+python scripts/render_dashboard_screenshots.py
+
+# 6. Export all master workbooks and CSV specification tables
 python scripts/generate_all_workbooks.py
 ```
 
