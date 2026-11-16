@@ -133,7 +133,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 
 ## 📊 Production BI Dashboard Suite & Visual Gallery
 
-The analytical blueprint includes seven fully designed, interactive BI dashboards implemented in [dashboards/index.html](dashboards/index.html) and compiled into high-resolution visual evidence artifacts below:
+The analytical blueprint includes seven fully designed, interactive BI dashboards implemented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/index.html and compiled into high-resolution visual evidence artifacts below:
 
 ### 1. Executive Overview Dashboard
 https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_1_executive_overview.png
