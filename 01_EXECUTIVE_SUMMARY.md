@@ -134,4 +134,4 @@ flowchart LR
    - Deploy automated alerting on statistical metric deviations (reversal spikes, withdrawal queue delays).
 
 ---
-*Deliverable Document Reference: `docs/01_EXECUTIVE_SUMMARY.md` | Prepared for VELOOP Engineering & Product Leadership.*
+
