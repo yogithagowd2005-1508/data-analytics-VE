@@ -151,7 +151,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 The analytical blueprint includes seven fully designed, interactive BI dashboards implemented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/index.html and compiled into high-resolution visual evidence artifacts below:
 
 ### 1. Executive Overview Dashboard
-![Executive Overview Dashboard](dashboards/screenshots/dashboard_1_executive_overview.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_1_executive_overview.png
 * **Target Audience**: C-Suite, Founders, Operations Lead
 * **Key Metrics**: DAU (`1,420` cumulative, ~37 unique/day), Task Completion (`72.6%` - 4,357 of 6,000 tasks), Completed Payout (`73.5%` - 882 of 1,200), Turnaround SLA (`38.1 Hours` within 48h SLA)
 * **Visuals**: 30-Day Activity Trends, Influx vs. Outflow Area Chart, Donut of Payout Channels (PayPal 45%, Crypto 28%, Amazon 18%, Bank 9%)
