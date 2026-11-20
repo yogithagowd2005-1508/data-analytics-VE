@@ -134,7 +134,7 @@ Over a structured 25-day product analytics methodology, this project establishes
    - Sum of closing balances matches net completed ledger entries with `0.000000 VEs` parity discrepancy.
    - All 6 Invariant Tests `[WLT-TC01]` through `[WLT-TC06]` in `scripts/validate_wallet_reconciliation.py` **PASSED**.
 6. **Rigorous KPI Verification (All 35 KPIs Audited)**:
-   - Full mathematical and empirical audit across 7 business domains documented in [KPI_CATALOGUE.md](docs/11_KPI_CATALOGUE.md) and https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.csv.
+   - Full mathematical and empirical audit across 7 business domains documented in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.md and https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/11_KPI_CATALOGUE.csv.
    - **24 KPIs calculated directly** from simulated tables (Task Completion: `72.6%`, Rewards Issued: `698,350 VEs`, Circulating Supply: `+268,855.00 VEs`, Payout SLA: `38.1 Hours`, K-Factor: `0.56` / `0.37`).
    - **11 KPIs verified as sound specifications**, with upstream tracking dependencies identified for live deployment (Net Ad Revenue ARPU requires ad network revenue API; Multi-Account Collusion requires hardware device fingerprinting).
 7. **Live Dashboard Suite & Visual Evidence**:
