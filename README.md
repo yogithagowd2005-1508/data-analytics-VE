@@ -175,7 +175,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_
 ---
 
 ### 4. Rewards & Liability Management Dashboard
-![Rewards Dashboard](dashboards/screenshots/dashboard_4_rewards.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_4_rewards.png
 * **Target Audience**: CFO, Product Economist, Treasury Operations
 * **Key Metrics**: Gross Points Issued (`698,350 VEs Credited` across 4,638 records), Reversal Rate (`3.20%` - 160 clawbacks), Escrow Buffer (`4.30%`), Reserve Coverage (`100.0%` solvent)
 * **Visuals**: Daily Issuance vs. Reversal Bars, Multi-Unit Distribution (VEs, XP, Gems), Feature Liability Yield Matrix
@@ -183,7 +183,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_
 ---
 
 ### 5. Multi-Currency Wallet & Ledger Dashboard
-![Wallet Ledger Dashboard](dashboards/screenshots/dashboard_5_wallet.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_5_wallet.png
 * **Target Audience**: Financial Controller, Ledger Architecture Team
 * **Key Metrics**: Circulating Supply (`+268,855.00 VEs` net positive unredeemed float), Double-Entry Lines (`3,500`), Completed Credits (`+370.3k VEs`), Completed Debits (`-101.5k VEs`), Overdraft Violations (`0` accounts, min balance `0.00 VEs`)
 * **Visuals**: Ledger Flow Influx vs. Redemption Debits, User Balance Distribution Percentiles (P50: 199 VEs, P90, P99), 36 Reversal Pair Audit Log
@@ -191,7 +191,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_
 ---
 
 ### 6. Withdrawals & Cash-Out Operations Dashboard
-![Withdrawals Dashboard](dashboards/screenshots/dashboard_6_withdrawals.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_6_withdrawals.png
 * **Target Audience**: Payment Operations, Risk & Compliance Team
 * **Key Metrics**: Fulfillment Rate (`73.5%` - 882 settled), Pending Review Queue (`125` - 10.4%), Mean Turnaround SLA (`38.1 Hours`), Rejection Rate (`13.7%` - 164)
 * **Visuals**: Payout TAT Duration Histogram, Rejection Reason Breakdown (Provider Error, Account Mismatch, Threshold, Fraud), Real-time Queue Monitor
@@ -199,7 +199,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_
 ---
 
 ### 7. Referrals & Viral Growth Funnel Dashboard
-![Referrals Dashboard](dashboards/screenshots/dashboard_7_referrals.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_7_referrals.png
 * **Target Audience**: Growth Lead, Virality Strategist
 * **Key Metrics**: Invite Links Generated (`900`), Signup Rate (`84.4%` - 760 users), Activation Rate (`73.7%` - 560 users), Bounty Conversion (`41.1%` - 370 users), Activated Viral Coefficient (**$K = 0.56$**), Bounty Conversion Coefficient (**$K_{\text{bounty}} = 0.37$**)
 * **Visuals**: 4-Stage Referral Funnel (`900` links $\rightarrow$ `760` signups $\rightarrow$ `560` activations $\rightarrow$ `370` bounties), Social Share Attribution, Top Advocates Leaderboard
