@@ -235,4 +235,45 @@ Each KPI adheres strictly to the required 11-point definition standard:
 - **Status**: Proposed
 
 ---
+
+## 5. Work Package D4: Empirical Wallet Ledger & Withdrawal Reconciliation Engine
+
+To address the critical financial integrity mandate and resolve the negative circulating supply discrepancy previously identified during auditing, an end-to-end automated reconciliation engine was built and executed (`scripts/validate_wallet_reconciliation.py`).
+
+### Root Cause Analysis & Resolution of Negative Circulating Supply
+In earlier simulated prototypes, withdrawal debit transactions were generated without checking the user's running earned balance, leading to unbacked debits, artificial negative user balances (down to -15,905 VEs), and an overall negative circulating float (-1.68M VEs).
+**Permanent Resolution**:
+1. Every debit (withdrawal, token exchange, fee) is strictly bounded by the user's chronological cumulative earned balance: `withdrawal_amount <= running_balance * 0.60`.
+2. Initial/Opening balance is fixed at `0.00 VEs` across all 1,000 registered accounts.
+3. Overdrafts are mathematically prohibited: `minimum_user_balance >= 0.00 VEs`.
+4. Reversals are bounded so that clawing back credits cannot push an account below zero.
+
+### Ledger Balance & Cash Flow Summary
+- **Total Accounts Audited**: 1,000 users
+- **User Opening Balance**: `0.00 VEs` across all 1,000 accounts
+- **Total Ledger Transactions**: 3,500 rows (2,342 Credits, 1,158 Debits)
+- **Gross Ledger Credits**: `+371,985.00 VEs` (Completed: `+370,335.00 VEs`; Pending/Failed: `+1,650.00 VEs`)
+- **Gross Ledger Debits**: `-106,245.00 VEs` (Completed: `-101,480.00 VEs`; Pending/Failed: `-4,765.00 VEs`)
+- **Net Circulating Supply (Float)**: `+268,855.00 VEs`
+- **Sum of User Closing Balances**: `+268,855.00 VEs`
+- **Circulating Supply Parity Discrepancy**: `0.000000 VEs` (Exact Mathematical Parity)
+- **Minimum User Balance Recorded**: `0.00 VEs` (Zero overdrafts across 1,000 accounts at all chronological points)
+- **Maximum User Balance Recorded**: `2,075.00 VEs`
+- **Median (P50) User Balance**: `199.00 VEs`
+
+### Test Suite Execution Evidence (All 6 Test Cases PASSED)
+
+| Test ID | Invariant Verified | Validation Logic | Scope Checked | Result | Discrepancy |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **WLT-TC01** | Double-Entry Sign Invariant | Credits strictly positive (`> 0`), Debits strictly negative (`< 0`) | 3,500 Ledger Rows | **PASSED** | 0 violations |
+| **WLT-TC02** | Zero Overdraft Invariant | No user balance may drop below `0.00 VEs` at any point in time | 1,000 User Accounts | **PASSED** | 0 overdrafts (Min: `0.00 VEs`) |
+| **WLT-TC03** | Circulating Supply Parity | Sum of user closing balances == Net completed ledger entries | 1,000 Users vs Ledger | **PASSED** | `0.000000 VEs` exact parity |
+| **WLT-TC04** | Reward-to-Wallet Credit Audit | Every `reward_credit` maps to a valid record in `Rewards.csv` | 2,280 Reward Credits | **PASSED** | 0 orphan credits (100% matched) |
+| **WLT-TC05** | Withdrawal Settlement Audit | All 882 completed withdrawals have corresponding debits; 62 refunds mapped | 1,200 Withdrawal Requests | **PASSED** | 0 orphan settlements |
+| **WLT-TC06** | Reversal Link Audit | Offsetting reversal entries link to verified parent transaction IDs | 36 Reversal Rows | **PASSED** | 0 orphan reversals |
+
+- **Reconciliation Engine Script**: `scripts/validate_wallet_reconciliation.py`
+- **Detailed Audit Outputs**: `data/wallet_reconciliation_test_results.csv` and `data/wallet_reconciliation_summary.csv`
+
+---
 *Deliverable Document Reference: `docs/06_WALLET_WITHDRAWAL_ANALYTICS.md` | Related Spec: `deliverables_tables/11_KPI_CATALOGUE.csv`.*

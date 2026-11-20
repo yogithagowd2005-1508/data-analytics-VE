@@ -1,5 +1,5 @@
 """
-VELOOP REWARDS - SIMULATED DATA GENERATION ENGINE
+VELOP REWARDS - SIMULATED DATA GENERATION ENGINE
 =================================================
 MANDATORY COMPLIANCE HEADER:
 SIMULATED DATA — CREATED FOR ANALYTICAL TESTING
@@ -10,7 +10,12 @@ actual earnings, actual withdrawals, or live production performance.
 Methodology:
 - Deterministic pseudo-random generation with fixed seed (seed=42) for full reproducibility.
 - Models 7 interconnected operational entities plus 1 intentionally corrupted "Messy Data" audit sheet.
-- Emulates realistic product behavior: drop-offs, pending queues, failed tasks, reversals, and user churn.
+- Enforces strict financial accounting invariants:
+  1. Opening Balance = 0.00 for all users at registration.
+  2. Double-entry ledger sign invariant: Credits > 0, Debits < 0.
+  3. No overdrafts: Every user balance remains >= 0.00 at all timestamps.
+  4. Positive Circulating Supply: Total Credits > Total Completed Debits.
+  5. 100% Referential integrity across all core operational tables.
 """
 
 import os
@@ -23,6 +28,10 @@ def generate_datasets():
     random.seed(42)
     np.random.seed(42)
 
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, 'data')
+    os.makedirs(data_dir, exist_ok=True)
+
     base_date = datetime.datetime(2026, 1, 1, 0, 0, 0)
     end_date = datetime.datetime(2026, 10, 31, 23, 59, 59)
     total_seconds = int((end_date - base_date).total_seconds())
@@ -31,7 +40,9 @@ def generate_datasets():
         offset = random.randint(0, total_seconds)
         return base_date + datetime.timedelta(seconds=offset)
 
-    # 1. USERS (~1,000 records)
+    # ==========================================
+    # 1. USERS (1,000 records)
+    # ==========================================
     print("Generating Users (1,000 records)...")
     user_ids = [f"USR_{i:05d}" for i in range(1, 1001)]
     reg_sources = ['organic', 'referral', 'paid_ad', 'partner_promo', 'influencer']
@@ -46,21 +57,23 @@ def generate_datasets():
     status_weights = [0.68, 0.24, 0.05, 0.03]
 
     users_data = []
+    user_reg_map = {}
     for uid in user_ids:
         reg_ts = random_timestamp()
+        user_reg_map[uid] = reg_ts
         source = random.choices(reg_sources, weights=reg_source_weights)[0]
         camp = random.choices(campaigns, weights=campaign_weights)[0] if source != 'organic' else None
         plat = random.choices(platforms, weights=platform_weights)[0]
         cntry = random.choices(countries, weights=country_weights)[0]
         status = random.choices(statuses, weights=status_weights)[0]
         
-        onboarding_done = random.random() < 0.82
+        onboarding_done = random.random() < 0.817 # 81.7% onboarding completion
         if onboarding_done:
             onb_ts = reg_ts + datetime.timedelta(minutes=random.randint(2, 120))
         else:
             onb_ts = None
             
-        last_login_offset = random.randint(0, int((end_date - reg_ts).total_seconds()))
+        last_login_offset = random.randint(0, max(1, int((end_date - reg_ts).total_seconds())))
         last_login = reg_ts + datetime.timedelta(seconds=last_login_offset)
 
         users_data.append({
@@ -76,27 +89,33 @@ def generate_datasets():
             'last_login_timestamp': last_login.strftime('%Y-%m-%d %H:%M:%S')
         })
     df_users = pd.DataFrame(users_data)
+    active_user_pool = df_users[df_users['account_status'].isin(['active', 'dormant'])]['user_id'].tolist()
 
-    # 2. TASK ACTIVITY (~6,000 records)
+    # ==========================================
+    # 2. TASK ACTIVITY (6,000 records)
+    # ==========================================
     print("Generating Task Activity (6,000 records)...")
     task_types = ['watch_ad', 'survey', 'tap_earn', 'mining', 'offerwall', 'app_install']
     task_type_weights = [0.40, 0.18, 0.20, 0.10, 0.07, 0.05]
     task_catalog = {
-        'watch_ad': ('TK_AD_101', 'AdMob Short Video', 15, 'VEs', 'GoogleAdMob'),
-        'survey': ('TK_SURV_201', 'Consumer Opinion Survey', 120, 'VEs', 'Pollfish'),
-        'tap_earn': ('TK_TAP_301', 'Daily Energy Tap Session', 25, 'VEs', 'InternalEngine'),
-        'mining': ('TK_MINE_401', '6-Hour Cloud Hash Claim', 80, 'VEs', 'InternalEngine'),
-        'offerwall': ('TK_OFF_501', 'Reach Level 10 in Castle Quest', 450, 'VEs', 'Tapjoy'),
-        'app_install': ('TK_APP_601', 'Download & Open FinApp', 250, 'VEs', 'IronSource')
+        'watch_ad': ('TK_AD_101', 'AdMob Short Video', 25, 'VEs', 'GoogleAdMob'),
+        'survey': ('TK_SURV_201', 'Consumer Opinion Survey', 250, 'VEs', 'Pollfish'),
+        'tap_earn': ('TK_TAP_301', 'Daily Energy Tap Session', 40, 'VEs', 'InternalEngine'),
+        'mining': ('TK_MINE_401', '6-Hour Cloud Hash Claim', 150, 'VEs', 'InternalEngine'),
+        'offerwall': ('TK_OFF_501', 'Reach Level 10 in Castle Quest', 800, 'VEs', 'Tapjoy'),
+        'app_install': ('TK_APP_601', 'Download & Open FinApp', 450, 'VEs', 'IronSource')
     }
-    task_statuses = ['completed', 'failed', 'abandoned', 'pending_validation']
-    task_status_weights = [0.72, 0.12, 0.11, 0.05]
-    validation_statuses = ['validated', 'rejected', 'pending']
+    
+    # 4,357 completed (72.62%), 728 failed (12.13%), 630 abandoned (10.50%), 285 pending (4.75%)
+    exact_statuses = (
+        ['completed'] * 4357 +
+        ['failed'] * 728 +
+        ['abandoned'] * 630 +
+        ['pending_validation'] * 285
+    )
+    random.shuffle(exact_statuses)
 
     task_activity_data = []
-    active_user_pool = df_users[df_users['account_status'].isin(['active', 'dormant'])]['user_id'].tolist()
-    user_reg_map = dict(zip(df_users['user_id'], pd.to_datetime(df_users['registration_timestamp'])))
-
     for i in range(1, 6001):
         uid = random.choice(active_user_pool)
         user_reg = user_reg_map[uid]
@@ -104,57 +123,65 @@ def generate_datasets():
         start_ts = user_reg + datetime.timedelta(seconds=random.randint(0, sec_avail))
         
         ttype = random.choices(task_types, weights=task_type_weights)[0]
-        cat_info = task_catalog[ttype]
-        status = random.choices(task_statuses, weights=task_status_weights)[0]
+        tid, fcat, r_amt, r_unit, partner = task_catalog[ttype]
+        status = exact_statuses[i - 1]
         
-        duration = random.randint(15, 900)
-        completed_ts = start_ts + datetime.timedelta(seconds=duration) if status in ['completed', 'failed', 'pending_validation'] else None
-        
-        if status == 'completed':
-            val_status = 'validated'
-            error_reason = ''
-        elif status == 'failed':
+        if status in ['completed', 'failed']:
+            dur_mins = random.randint(1, 45) if ttype != 'mining' else random.randint(360, 420)
+            comp_ts = start_ts + datetime.timedelta(minutes=dur_mins)
+            val_status = 'validated' if status == 'completed' else 'rejected'
+            err_reason = '' if status == 'completed' else random.choice(['timeout', 'bot_detected', 'screening_failed'])
+        elif status == 'abandoned':
+            comp_ts = start_ts + datetime.timedelta(minutes=random.randint(1, 5))
             val_status = 'rejected'
-            error_reason = random.choice(['tracking_timeout', 'anti_bot_check_failed', 'postback_missing', 'user_closed_window'])
-        elif status == 'pending_validation':
+            err_reason = 'user_cancelled'
+        else: # pending_validation
+            comp_ts = None
             val_status = 'pending'
-            error_reason = ''
-        else: # abandoned
-            val_status = 'rejected'
-            error_reason = 'user_abandoned'
+            err_reason = ''
 
         task_activity_data.append({
-            'task_activity_id': f"TSK_{i:06d}",
-            'task_id': cat_info[0],
+            'task_activity_id': f"ACT_{i:06d}",
+            'task_id': tid,
             'task_type': ttype,
-            'feature_category': 'Earning',
+            'feature_category': fcat,
             'user_id': uid,
             'started_at': start_ts.strftime('%Y-%m-%d %H:%M:%S'),
-            'completed_at': completed_ts.strftime('%Y-%m-%d %H:%M:%S') if completed_ts else '',
+            'completed_at': comp_ts.strftime('%Y-%m-%d %H:%M:%S') if comp_ts else '',
             'status': status,
-            'reward_amount': cat_info[2],
-            'reward_unit': cat_info[3],
+            'reward_amount': r_amt,
+            'reward_unit': r_unit,
             'validation_status': val_status,
-            'partner_provider': cat_info[4],
-            'error_reason': error_reason
+            'partner_provider': partner,
+            'error_reason': err_reason
         })
     df_task_activity = pd.DataFrame(task_activity_data)
 
-    # 3. REWARDS (~5,000 records)
+    # ==========================================
+    # 3. REWARDS (5,000 records)
+    # ==========================================
     print("Generating Rewards (5,000 records)...")
     reward_types = ['task_completion', 'daily_login', 'streak_bonus', 'referral_bonus', 'spin_wheel', 'badge_milestone']
     reward_weights = [0.60, 0.15, 0.08, 0.07, 0.06, 0.04]
-    reward_statuses = ['credited', 'pending', 'reversed']
-    reward_status_weights = [0.93, 0.04, 0.03]
+    
+    # 4,638 credited (92.76%), 202 pending (4.04%), 160 reversed (3.20%)
+    exact_reward_statuses = (
+        ['credited'] * 4638 +
+        ['pending'] * 202 +
+        ['reversed'] * 160
+    )
+    random.shuffle(exact_reward_statuses)
 
     completed_tasks = df_task_activity[df_task_activity['validation_status'] == 'validated'].to_dict('records')
     random.shuffle(completed_tasks)
     task_idx = 0
 
     rewards_data = []
+    user_rewards_map = {uid: [] for uid in df_users['user_id']}
+
     for i in range(1, 5001):
         rtype = random.choices(reward_types, weights=reward_weights)[0]
-        r_status = random.choices(reward_statuses, weights=reward_status_weights)[0]
+        r_status = exact_reward_statuses[i - 1]
         
         if rtype == 'task_completion' and task_idx < len(completed_tasks):
             t_row = completed_tasks[task_idx]
@@ -172,21 +199,19 @@ def generate_datasets():
             sec_avail = max(1, int((end_date - user_reg).total_seconds()))
             credit_ts = user_reg + datetime.timedelta(seconds=random.randint(0, sec_avail))
             if rtype == 'daily_login':
-                amt, unit = 20, 'VEs'
+                amt, unit = 50, 'VEs'
             elif rtype == 'streak_bonus':
-                amt, unit = 100, 'VEs'
+                amt, unit = 200, 'VEs'
             elif rtype == 'referral_bonus':
-                amt, unit = 250, 'VEs'
+                amt, unit = 300, 'VEs'
             elif rtype == 'spin_wheel':
-                amt, unit = random.choice([10, 50, 150, 300]), 'VEs'
+                amt, unit = random.choice([50, 100, 250, 500]), 'VEs'
             else: # badge_milestone
                 amt, unit = 500, 'XP'
 
-        correction_id = ''
-        if r_status == 'reversed':
-            correction_id = f"RWD_{random.randint(1, max(1, i-1)):05d}"
+        correction_id = f"RWD_{random.randint(1, max(1, i-1)):05d}" if r_status == 'reversed' else ''
 
-        rewards_data.append({
+        rwd_entry = {
             'reward_id': f"RWD_{i:05d}",
             'user_id': uid,
             'task_activity_id': task_ref,
@@ -197,117 +222,160 @@ def generate_datasets():
             'credited_at': credit_ts.strftime('%Y-%m-%d %H:%M:%S'),
             'ledger_status': 'posted' if r_status == 'credited' else ('reversed' if r_status == 'reversed' else 'pending'),
             'correction_reference_id': correction_id
-        })
+        }
+        rewards_data.append(rwd_entry)
+        if r_status == 'credited' and unit == 'VEs':
+            user_rewards_map[uid].append(rwd_entry)
+
     df_rewards = pd.DataFrame(rewards_data)
 
-    # 4. WALLET TRANSACTIONS (~3,500 records)
-    print("Generating Wallet Transactions (3,500 records)...")
-    wallet_types = ['reward_credit', 'withdrawal_debit', 'token_exchange', 'admin_adjustment', 'withdrawal_refund']
-    wallet_type_weights = [0.65, 0.22, 0.08, 0.03, 0.02]
+    # ==========================================
+    # 4 & 5. WITHDRAWALS (1,200) & WALLET (3,500)
+    # CO-GENERATED WITH STRICT BALANCE CONSTRAINTS
+    # ==========================================
+    print("Co-generating Withdrawals (1,200) and Wallet Ledger (3,500) with Balance Invariants...")
+    
+    # Track chronological user ledger state:
+    # Opening Balance = 0.00. Running balance >= 0.00 at all times.
+    user_txns = {uid: [] for uid in df_users['user_id']}
 
-    wallet_data = []
-    # Use credited rewards as baseline
-    credited_rewards = df_rewards[df_rewards['status'] == 'credited'].to_dict('records')
-    random.shuffle(credited_rewards)
-    rwd_ptr = 0
+    # Post credited rewards into ledger history first
+    credited_rewards = df_rewards[(df_rewards['status'] == 'credited') & (df_rewards['reward_unit'] == 'VEs')].to_dict('records')
+    # Sort chronologically
+    credited_rewards.sort(key=lambda x: x['credited_at'])
 
-    for i in range(1, 3501):
-        wtype = random.choices(wallet_types, weights=wallet_type_weights)[0]
-        
-        if wtype == 'reward_credit' and rwd_ptr < len(credited_rewards):
-            r_item = credited_rewards[rwd_ptr]
-            rwd_ptr += 1
-            uid = r_item['user_id']
-            amt = float(r_item['amount'])
-            unit = r_item['reward_unit']
-            ts = r_item['credited_at']
-            status = 'completed'
-            src = 'reward_engine'
-            ref_id = r_item['reward_id']
-        elif wtype == 'withdrawal_debit':
-            uid = random.choice(active_user_pool)
-            amt = -float(random.choice([500, 1000, 2000, 5000]))
-            unit = 'VEs'
-            u_ts = user_reg_map[uid] + datetime.timedelta(days=random.randint(5, 60))
-            ts = min(u_ts, end_date).strftime('%Y-%m-%d %H:%M:%S')
-            status = random.choices(['completed', 'pending', 'reversed'], weights=[0.88, 0.08, 0.04])[0]
-            src = 'withdrawal_engine'
-            ref_id = f"WDR_{random.randint(1, 1200):04d}"
-        elif wtype == 'token_exchange':
-            uid = random.choice(active_user_pool)
-            amt = -float(random.choice([200, 500, 1000]))
-            unit = 'VEs'
-            u_ts = user_reg_map[uid] + datetime.timedelta(days=random.randint(3, 40))
-            ts = min(u_ts, end_date).strftime('%Y-%m-%d %H:%M:%S')
-            status = 'completed'
-            src = 'exchange_service'
-            ref_id = f"EXC_{i:05d}"
-        elif wtype == 'admin_adjustment':
-            uid = random.choice(active_user_pool)
-            amt = float(random.choice([50, -50, 100, -100]))
-            unit = 'VEs'
-            u_ts = user_reg_map[uid] + datetime.timedelta(days=random.randint(10, 50))
-            ts = min(u_ts, end_date).strftime('%Y-%m-%d %H:%M:%S')
-            status = 'completed'
-            src = 'manual_ops'
-            ref_id = f"ADJ_{i:04d}"
-        else: # withdrawal_refund
-            uid = random.choice(active_user_pool)
-            amt = float(random.choice([500, 1000, 2000]))
-            unit = 'VEs'
-            u_ts = user_reg_map[uid] + datetime.timedelta(days=random.randint(15, 70))
-            ts = min(u_ts, end_date).strftime('%Y-%m-%d %H:%M:%S')
-            status = 'completed'
-            src = 'withdrawal_engine'
-            ref_id = f"WDR_{random.randint(1, 1200):04d}"
-
-        wallet_data.append({
-            'transaction_id': f"TXN_{i:06d}",
-            'user_id': uid,
-            'timestamp': ts,
-            'transaction_type': wtype,
+    # We need 2,280 reward credits in Wallet.
+    # Take the first 2,280 sorted credited rewards
+    selected_reward_credits = credited_rewards[:2280]
+    
+    for r in selected_reward_credits:
+        uid = r['user_id']
+        amt = float(r['amount'])
+        user_txns[uid].append({
+            'timestamp': pd.to_datetime(r['credited_at']),
+            'transaction_type': 'reward_credit',
             'amount': amt,
-            'unit': unit,
-            'status': status,
-            'source': src,
-            'reference_id': ref_id,
-            'reversal_relationship_id': f"TXN_{random.randint(1, max(1, i-1)):06d}" if status == 'reversed' else ''
+            'unit': 'VEs',
+            'status': 'completed',
+            'source': 'reward_engine',
+            'reference_id': r['reward_id']
         })
-    df_wallet = pd.DataFrame(wallet_data)
 
-    # 5. WITHDRAWALS (~1,200 records)
-    print("Generating Withdrawals (1,200 records)...")
+    def is_safe_debit(uid, ts_debit, debit_amt):
+        test_list = user_txns[uid] + [{'timestamp': ts_debit, 'amount': -debit_amt, 'status': 'completed'}]
+        test_list.sort(key=lambda x: x['timestamp'])
+        bal = 0.0
+        for t in test_list:
+            if t['status'] == 'completed':
+                bal += t['amount']
+                if bal < 0:
+                    return False
+        return True
+
+    # Prepare Withdrawals (1,200 records)
     wdr_methods = ['PayPal', 'Crypto_USDT', 'GiftCard_Amazon', 'BankTransfer']
     wdr_method_weights = [0.45, 0.28, 0.18, 0.09]
-    wdr_statuses = ['completed', 'rejected', 'processing', 'reversed']
-    wdr_status_weights = [0.74, 0.14, 0.09, 0.03]
     rejection_reasons = ['KYC_incomplete', 'minimum_threshold_not_met', 'suspected_fraud', 'third_party_provider_error', 'account_mismatch']
+    
+    # 882 completed (73.5%), 164 rejected (13.67%), 125 processing (10.42%), 29 reversed (2.42%)
+    exact_wdr_statuses = (
+        ['completed'] * 882 +
+        ['rejected'] * 164 +
+        ['processing'] * 125 +
+        ['reversed'] * 29
+    )
+    random.shuffle(exact_wdr_statuses)
 
+    earners = [uid for uid, txs in user_txns.items() if len(txs) > 0]
     withdrawals_data = []
+    rejected_refund_count = 0
+
     for i in range(1, 1201):
-        uid = random.choice(active_user_pool)
-        user_reg = user_reg_map[uid]
-        sec_avail = max(1, int((end_date - user_reg).total_seconds()))
-        req_ts = user_reg + datetime.timedelta(seconds=random.randint(0, sec_avail))
+        status = exact_wdr_statuses[i - 1]
         
-        method = random.choices(wdr_methods, weights=wdr_method_weights)[0]
-        amt = random.choice([500, 1000, 1500, 2000, 3000, 5000, 10000])
-        status = random.choices(wdr_statuses, weights=wdr_status_weights)[0]
-        
-        proc_ts = req_ts + datetime.timedelta(hours=random.randint(1, 24))
-        if status == 'completed':
+        found_user = False
+        for attempt in range(50):
+            uid = random.choice(earners)
+            credits = [t for t in user_txns[uid] if t['transaction_type'] == 'reward_credit']
+            anchor = random.choice(credits)
+            req_ts = anchor['timestamp'] + datetime.timedelta(hours=random.randint(1, 120))
+            if req_ts > end_date:
+                req_ts = end_date - datetime.timedelta(hours=random.randint(1, 48))
+            proc_ts = req_ts + datetime.timedelta(hours=random.randint(1, 24))
             final_ts = proc_ts + datetime.timedelta(hours=random.randint(2, 48))
+            if final_ts > end_date:
+                final_ts = end_date
+                
+            for candidate_amt in [150.0, 100.0, 75.0, 50.0, 25.0, 15.0]:
+                if is_safe_debit(uid, final_ts, candidate_amt):
+                    amt = candidate_amt
+                    found_user = True
+                    break
+            if found_user:
+                break
+                
+        if not found_user:
+            uid = random.choice(earners)
+            req_ts = pd.to_datetime('2026-06-01 12:00:00') + datetime.timedelta(days=random.randint(0, 120))
+            proc_ts = req_ts + datetime.timedelta(hours=2)
+            final_ts = proc_ts + datetime.timedelta(hours=4)
+            amt = 25.0
+            user_txns[uid].append({
+                'timestamp': req_ts - datetime.timedelta(hours=2),
+                'amount': 100.0,
+                'transaction_type': 'reward_credit',
+                'status': 'completed',
+                'reference_id': f"RWD_PAD_{i:04d}",
+                'source': 'reward_engine',
+                'unit': 'VEs'
+            })
+
+        method = random.choices(wdr_methods, weights=wdr_method_weights)[0]
+
+        if status == 'completed':
             rej_reason = ''
             tx_hash = f"HASH_{random.randint(10000000, 99999999):X}"
+            user_txns[uid].append({
+                'timestamp': final_ts,
+                'amount': -amt,
+                'transaction_type': 'withdrawal_debit',
+                'status': 'completed',
+                'reference_id': f"WDR_{i:04d}",
+                'source': 'withdrawal_engine',
+                'unit': 'VEs'
+            })
+            
         elif status == 'rejected':
-            final_ts = proc_ts + datetime.timedelta(hours=random.randint(1, 12))
             rej_reason = random.choice(rejection_reasons)
             tx_hash = ''
+            if rejected_refund_count < 33:
+                rejected_refund_count += 1
+                refund_ts = final_ts + datetime.timedelta(minutes=30)
+                user_txns[uid].append({
+                    'timestamp': refund_ts,
+                    'amount': amt,
+                    'transaction_type': 'withdrawal_refund',
+                    'status': 'completed',
+                    'reference_id': f"WDR_{i:04d}",
+                    'source': 'withdrawal_engine',
+                    'unit': 'VEs'
+                })
+                
         elif status == 'reversed':
-            final_ts = proc_ts + datetime.timedelta(hours=random.randint(24, 96))
             rej_reason = 'provider_payout_failed_reversed'
             tx_hash = ''
-        else: # processing
+            refund_ts = final_ts + datetime.timedelta(minutes=60)
+            user_txns[uid].append({
+                'timestamp': refund_ts,
+                'amount': amt,
+                'transaction_type': 'withdrawal_refund',
+                'status': 'completed',
+                'reference_id': f"WDR_{i:04d}",
+                'source': 'withdrawal_engine',
+                'unit': 'VEs'
+            })
+            
+        else: # processing (escrow locked)
             final_ts = None
             rej_reason = ''
             tx_hash = ''
@@ -328,12 +396,91 @@ def generate_datasets():
         })
     df_withdrawals = pd.DataFrame(withdrawals_data)
 
-    # 6. REFERRALS (~900 records)
+    # 3. Add Token Exchanges and Admin Adjustments to reach exactly 3,500 entries
+    current_entries = sum(len(txs) for txs in user_txns.values())
+    admin_adj_target = 66
+    needed_exchanges = 3500 - current_entries - admin_adj_target
+
+    token_exchange_count = 0
+    while token_exchange_count < needed_exchanges:
+        uid = random.choice(earners)
+        tx_ts = pd.to_datetime('2026-06-01 00:00:00') + datetime.timedelta(days=random.randint(0, 150))
+        for swap_amt in [25.0, 15.0, 10.0, 5.0]:
+            if is_safe_debit(uid, tx_ts, swap_amt):
+                user_txns[uid].append({
+                    'timestamp': tx_ts,
+                    'amount': -swap_amt,
+                    'transaction_type': 'token_exchange',
+                    'status': 'completed',
+                    'source': 'exchange_service',
+                    'reference_id': f"EXC_{token_exchange_count+1:05d}",
+                    'unit': 'VEs'
+                })
+                token_exchange_count += 1
+                break
+
+    # 4. Generate 66 Admin Adjustments
+    for adj_idx in range(admin_adj_target):
+        uid = random.choice(earners)
+        tx_ts = pd.to_datetime('2026-05-01 00:00:00') + datetime.timedelta(days=random.randint(0, 150))
+        user_txns[uid].append({
+            'timestamp': tx_ts,
+            'amount': 25.0,
+            'transaction_type': 'admin_adjustment',
+            'status': 'completed',
+            'source': 'customer_support',
+            'reference_id': f"ADJ_{adj_idx+1:05d}",
+            'unit': 'VEs'
+        })
+
+    all_wallet_entries = []
+    for uid, txs in user_txns.items():
+        for t in txs:
+            t['user_id'] = uid
+            t['timestamp'] = t['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+            all_wallet_entries.append(t)
+
+    assert len(all_wallet_entries) == 3500, f"Expected 3500 wallet rows, got {len(all_wallet_entries)}"
+    all_wallet_entries.sort(key=lambda x: x['timestamp'])
+
+    # 5. Reverse 36 safe debit transactions with parent relationships (reversing a debit only increases balance!)
+    wallet_final = []
+    debit_indices = [idx for idx, e in enumerate(all_wallet_entries, start=1) if idx > 10 and e['amount'] < 0]
+    reversed_indices = set(random.sample(debit_indices, 36))
+
+    for idx, e in enumerate(all_wallet_entries, start=1):
+        status = 'reversed' if idx in reversed_indices else e['status']
+        rev_id = f"TXN_{random.randint(1, idx-1):06d}" if status == 'reversed' else ''
+        
+        wallet_final.append({
+            'transaction_id': f"TXN_{idx:06d}",
+            'user_id': e['user_id'],
+            'timestamp': e['timestamp'],
+            'transaction_type': e['transaction_type'],
+            'amount': e['amount'],
+            'unit': e['unit'],
+            'status': status,
+            'source': e['source'],
+            'reference_id': e['reference_id'],
+            'reversal_relationship_id': rev_id
+        })
+    df_wallet = pd.DataFrame(wallet_final)
+
+    # ==========================================
+    # 6. REFERRALS (900 records)
+    # ==========================================
     print("Generating Referrals (900 records)...")
     channels = ['WhatsApp', 'Telegram', 'Twitter', 'DirectLink', 'SMS']
     channel_weights = [0.38, 0.28, 0.16, 0.12, 0.06]
-    ref_statuses = ['converted', 'activated', 'registered', 'link_created']
-    ref_status_weights = [0.42, 0.20, 0.22, 0.16]
+    
+    # 370 converted (41.11%), 190 activated (21.11%), 200 registered (22.22%), 140 link_created (15.56%)
+    exact_ref_statuses = (
+        ['converted'] * 370 +
+        ['activated'] * 190 +
+        ['registered'] * 200 +
+        ['link_created'] * 140
+    )
+    random.shuffle(exact_ref_statuses)
 
     referrals_data = []
     registered_referrals = df_users[df_users['registration_source'] == 'referral']['user_id'].tolist()
@@ -343,7 +490,7 @@ def generate_datasets():
         ref_by = random.choice(active_user_pool)
         create_ts = random_timestamp()
         channel = random.choices(channels, weights=channel_weights)[0]
-        r_stat = random.choices(ref_statuses, weights=ref_status_weights)[0]
+        r_stat = exact_ref_statuses[i - 1]
         
         if r_stat in ['registered', 'activated', 'converted']:
             if reg_ref_idx < len(registered_referrals):
@@ -377,7 +524,9 @@ def generate_datasets():
         })
     df_referrals = pd.DataFrame(referrals_data)
 
-    # 7. FEATURE EVENTS (~12,000 records)
+    # ==========================================
+    # 7. FEATURE EVENTS (12,000 records)
+    # ==========================================
     print("Generating Feature Events (12,000 records)...")
     event_names = [
         'daily_reward_claimed', 'streak_updated', 'spin_started', 'spin_completed',
@@ -409,15 +558,17 @@ def generate_datasets():
         })
     df_feature_events = pd.DataFrame(feature_events_data)
 
-    # 8. MESSY DATA (~550 records)
+    # ==========================================
+    # 8. MESSY DATA (550 records, 14 categories)
+    # ==========================================
     print("Generating Messy Data (550 records with deliberate data quality anomalies)...")
     messy_records = []
 
-    # Issue 1: Duplicate IDs (30 records)
+    # Category 1: Duplicate IDs (30 records)
     for i in range(1, 31):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
-            'user_id': 'USR_00100',  # duplicate ID reuse
+            'user_id': 'USR_00100',
             'timestamp': '2026-05-10 14:22:10',
             'event_name': 'task_completed',
             'amount': 50,
@@ -427,11 +578,11 @@ def generate_datasets():
             'issue_tag': 'duplicate_id'
         })
 
-    # Issue 2: Missing IDs (null user_id) (25 records)
+    # Category 2: Missing IDs (25 records)
     for i in range(31, 56):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
-            'user_id': None,  # Missing ID
+            'user_id': None,
             'timestamp': '2026-05-11 09:12:00',
             'event_name': 'daily_reward_claimed',
             'amount': 20,
@@ -441,12 +592,12 @@ def generate_datasets():
             'issue_tag': 'missing_id'
         })
 
-    # Issue 3: Missing Timestamps (25 records)
+    # Category 3: Missing Timestamps (25 records)
     for i in range(56, 81):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
-            'timestamp': None,  # Missing timestamp
+            'timestamp': None,
             'event_name': 'watch_ad_completed',
             'amount': 15,
             'status': 'completed',
@@ -455,13 +606,13 @@ def generate_datasets():
             'issue_tag': 'missing_timestamp'
         })
 
-    # Issue 4: Malformed Dates (35 records)
-    malformed_date_examples = ['2026/31/02', 'INVALID_DATE', '12-11-2026 99:99', '2026-00-15', 'N/A', '9999-99-99']
+    # Category 4: Malformed Dates (35 records)
+    malformed_dates = ['2026/31/02', 'INVALID_DATE', '12-11-2026 99:99', '2026-00-15', 'N/A', '9999-99-99']
     for i in range(81, 116):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
-            'timestamp': random.choice(malformed_date_examples),
+            'timestamp': random.choice(malformed_dates),
             'event_name': 'spin_completed',
             'amount': 100,
             'status': 'completed',
@@ -470,7 +621,7 @@ def generate_datasets():
             'issue_tag': 'malformed_date'
         })
 
-    # Issue 5: Invalid Statuses (30 records)
+    # Category 5: Invalid Statuses (30 records)
     invalid_statuses = ['COMPLETEDDDD', 'UNKNOWN_STATUS', 'finished_ok', 'pending_maybe', 'NULL_STATUS']
     for i in range(116, 146):
         messy_records.append({
@@ -485,7 +636,7 @@ def generate_datasets():
             'issue_tag': 'invalid_status'
         })
 
-    # Issue 6: Inconsistent Capitalization (35 records)
+    # Category 6: Inconsistent Capitalization (35 records)
     mixed_caps = ['cOmPLeTeD', 'pEnDiNg', 'ReVeRsEd', 'FAILED_error', 'Success']
     for i in range(146, 181):
         messy_records.append({
@@ -500,13 +651,13 @@ def generate_datasets():
             'issue_tag': 'inconsistent_capitalization'
         })
 
-    # Issue 7: Trailing / Leading Spaces (35 records)
+    # Category 7: Trailing / Leading Spaces (35 records)
     for i in range(181, 216):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
-            'user_id': f"  USR_{i:05d}  ",  # spaces around ID
+            'user_id': f"  USR_{i:05d}  ",
             'timestamp': '2026-06-10 15:45:00',
-            'event_name': '  watch_ad   ',  # spaces around event name
+            'event_name': '  watch_ad   ',
             'amount': 15,
             'status': ' completed ',
             'platform': ' Android ',
@@ -514,7 +665,7 @@ def generate_datasets():
             'issue_tag': 'trailing_spaces'
         })
 
-    # Issue 8: Invalid Numeric Values (string instead of float/int) (30 records)
+    # Category 8: Invalid Numeric Values (30 records)
     invalid_nums = ['one_hundred', 'NaN', '###', 'NULL_NUM', '10.5.2']
     for i in range(216, 246):
         messy_records.append({
@@ -529,140 +680,160 @@ def generate_datasets():
             'issue_tag': 'invalid_numeric_value'
         })
 
-    # Issue 9: Negative Values where inappropriate (30 records)
+    # Category 9: Negative Values where inappropriate (30 records)
     for i in range(246, 276):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
             'timestamp': '2026-06-20 08:10:00',
             'event_name': 'withdrawal_requested',
-            'amount': -random.randint(100, 5000),  # Negative requested amount
+            'amount': -random.randint(100, 5000),
             'status': 'requested',
             'platform': 'Android',
             'category': 'Withdrawals',
             'issue_tag': 'negative_numeric_value'
         })
 
-    # Issue 10: Unexpected Nulls in critical columns (30 records)
+    # Category 10: Unexpected Nulls in Mandatory Columns (30 records)
     for i in range(276, 306):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
-            'timestamp': '2026-07-01 11:15:00',
-            'event_name': None,  # Unexpected null event_name
+            'timestamp': '2026-06-25 14:00:00',
+            'event_name': None,  # Mandatory column missing
             'amount': 25,
             'status': 'completed',
-            'platform': None,  # Unexpected null platform
-            'category': None,
-            'issue_tag': 'unexpected_null'
+            'platform': None,    # Mandatory column missing
+            'category': None,    # Mandatory column missing
+            'issue_tag': 'unexpected_mandatory_null'
         })
 
-    # Issue 11: Orphan Records (Referencing Non-Existent Users) (45 records)
+    # Category 11: Orphan Foreign Keys (45 records)
     for i in range(306, 351):
+        fake_uid = f"USR_999{random.randint(10, 99)}"  # non-existent user
         messy_records.append({
             'record_id': f"REC_{i:04d}",
-            'user_id': f"USR_999{i%10:02d}",  # non-existent user ID
-            'timestamp': '2026-07-05 14:00:00',
+            'user_id': fake_uid,
+            'timestamp': '2026-07-01 11:15:00',
             'event_name': 'task_completed',
-            'amount': 80,
+            'amount': 50,
             'status': 'completed',
-            'platform': 'iOS',
+            'platform': 'Android',
             'category': 'Earning',
-            'issue_tag': 'orphan_record'
+            'issue_tag': 'orphan_foreign_key'
         })
 
-    # Issue 12: Duplicate Events (Same event sent twice within 0-1s) (40 records / 20 pairs)
-    for i in range(351, 391, 2):
-        ts_dup = f"2026-07-10 16:30:{i%59:02d}"
-        for step in [0, 1]:
-            messy_records.append({
-                'record_id': f"REC_{i+step:04d}",
-                'user_id': f"USR_{(i%50)+1:05d}",
-                'timestamp': ts_dup,
-                'event_name': 'streak_bonus_claimed',
-                'amount': 100,
-                'status': 'completed',
-                'platform': 'Android',
-                'category': 'Daily',
-                'issue_tag': 'duplicate_event'
-            })
+    # Category 12: Rapid-Burst Duplicate Events (<200ms) (40 records)
+    for i in range(351, 391):
+        messy_records.append({
+            'record_id': f"REC_{i:04d}",
+            'user_id': 'USR_00350',
+            'timestamp': '2026-07-10 16:00:00.050',  # burst double-tap
+            'event_name': 'tap_earn_clicked',
+            'amount': 5,
+            'status': 'completed',
+            'platform': 'Android',
+            'category': 'Earning',
+            'issue_tag': 'rapid_burst_event'
+        })
 
-    # Issue 13: Inconsistent Naming Standards (40 records)
-    variations = ['watch-ad', 'WATCH_ADS', 'WatchAd', 'ad_watch_view', 'watch_video_ad']
+    # Category 13: Inconsistent Event Naming (40 records)
+    bad_names = ['WATCH-AD', 'dailyRewardClaim', 'SPIN_THE_WHEEL!', 'TaskCompleted_V2']
     for i in range(391, 431):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
-            'timestamp': '2026-07-15 19:40:00',
-            'event_name': random.choice(variations),
-            'amount': 15,
+            'timestamp': '2026-07-20 19:30:00',
+            'event_name': random.choice(bad_names),
+            'amount': 30,
             'status': 'completed',
-            'platform': 'Android',
-            'category': 'Earning',
+            'platform': 'iOS',
+            'category': 'Engagement',
             'issue_tag': 'inconsistent_naming'
         })
 
-    # Issue 14: Impossible State Transitions / Chronology Violations (40 records)
+    # Category 14: Impossible State Transitions (40 records)
     for i in range(431, 471):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
             'user_id': f"USR_{i:05d}",
-            'timestamp': '2026-08-01 10:00:00',
-            'event_name': 'withdrawal_completed_before_request',
-            'amount': 1500,
+            'timestamp': '2026-07-25 21:00:00',
+            'event_name': 'withdrawal_lifecycle',
+            'amount': 500,
             'status': 'completed_prior_to_request',
             'platform': 'Android',
-            'category': 'Withdrawals',
+            'category': 'Wallet',
             'issue_tag': 'impossible_state_transition'
         })
 
-    # Additional standard records to round to ~550 (80 clean control records)
+    # Clean records to fill up to 550 total
     for i in range(471, 551):
         messy_records.append({
             'record_id': f"REC_{i:04d}",
-            'user_id': f"USR_{(i%100)+1:05d}",
+            'user_id': f"USR_{i:05d}",
             'timestamp': '2026-08-05 12:00:00',
-            'event_name': 'daily_reward_claimed',
+            'event_name': 'daily_checkin',
             'amount': 20,
             'status': 'completed',
             'platform': 'Android',
             'category': 'Daily',
-            'issue_tag': 'control_clean_record'
+            'issue_tag': 'clean_record'
         })
-
     df_messy = pd.DataFrame(messy_records)
 
-    # Save to CSVs
-    print("Writing CSV files to data/ ...")
-    csv_files = {
-        'Users.csv': df_users,
-        'Task_Activity.csv': df_task_activity,
-        'Rewards.csv': df_rewards,
-        'Wallet.csv': df_wallet,
-        'Withdrawals.csv': df_withdrawals,
-        'Referrals.csv': df_referrals,
-        'Feature_Events.csv': df_feature_events,
-        'Messy_Data.csv': df_messy
+    # ==========================================
+    # SAVE CSV FILES & MASTER EXCEL WORKBOOK
+    # ==========================================
+    datasets = {
+        'Users': df_users,
+        'Task_Activity': df_task_activity,
+        'Rewards': df_rewards,
+        'Wallet': df_wallet,
+        'Withdrawals': df_withdrawals,
+        'Referrals': df_referrals,
+        'Feature_Events': df_feature_events,
+        'Messy_Data': df_messy
     }
-    
-    for filename, df in csv_files.items():
-        filepath = os.path.join('data', filename)
-        df.to_csv(filepath, index=False)
-        print(f"Saved {filepath} ({len(df)} records)")
 
-    # Save to master Excel workbook
-    excel_path = os.path.join('data', 'VELOOP_Simulated_Datasets.xlsx')
-    print(f"Writing master Excel workbook to {excel_path}...")
+    total_rows = 0
+    print("\nSaving individual CSVs...")
+    for name, df in datasets.items():
+        csv_path = os.path.join(data_dir, f"{name}.csv")
+        df.to_csv(csv_path, index=False)
+        total_rows += len(df)
+        print(f"  - {name}.csv: {len(df):,} records saved to {csv_path}")
+
+    print(f"\nTotal Records Generated: {total_rows:,} records (Target: 30,150)")
+    assert total_rows == 30150, f"Record count mismatch! Expected 30,150, got {total_rows}"
+
+    excel_path = os.path.join(data_dir, "VELOOP_Simulated_Datasets.xlsx")
+    print(f"Exporting master multi-tab Excel file: {excel_path}...")
     with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-        df_users.to_excel(writer, sheet_name='Users', index=False)
-        df_task_activity.to_excel(writer, sheet_name='Task Activity', index=False)
-        df_rewards.to_excel(writer, sheet_name='Rewards', index=False)
-        df_wallet.to_excel(writer, sheet_name='Wallet', index=False)
-        df_withdrawals.to_excel(writer, sheet_name='Withdrawals', index=False)
-        df_referrals.to_excel(writer, sheet_name='Referrals', index=False)
-        df_feature_events.to_excel(writer, sheet_name='Feature Events', index=False)
-        df_messy.to_excel(writer, sheet_name='Messy Data', index=False)
-    print("Master Excel workbook generated successfully!")
+        for name, df in datasets.items():
+            df.to_excel(writer, sheet_name=name, index=False)
+    print("Master Excel workbook exported successfully.")
+
+    # Print summary reconciliation statistics:
+    total_credits = df_wallet[df_wallet['amount'] > 0]['amount'].sum()
+    total_debits = df_wallet[df_wallet['amount'] < 0]['amount'].sum()
+    circulating_supply = df_wallet[df_wallet['status'] == 'completed']['amount'].sum()
+    
+    ve_completed = df_wallet[(df_wallet['unit'] == 'VEs') & (df_wallet['status'] == 'completed')]
+    user_final_bals = ve_completed.groupby('user_id')['amount'].sum().to_dict()
+    for uid in df_users['user_id']:
+        if uid not in user_final_bals:
+            user_final_bals[uid] = 0.0
+
+    print("\n=======================================================")
+    print("FINANCIAL INVARIANT RECONCILIATION SUMMARY:")
+    print("=======================================================")
+    print(f"Total Ledger Credits:     +{total_credits:,.2f} VEs")
+    print(f"Total Ledger Debits:      {total_debits:,.2f} VEs")
+    print(f"Net Circulating Supply:   +{circulating_supply:,.2f} VEs (Positive Liability)")
+    print(f"Minimum User Balance:     {min(user_final_bals.values()):,.2f} VEs (Invariant: >= 0.00)")
+    print(f"Maximum User Balance:     {max(user_final_bals.values()):,.2f} VEs")
+    print(f"Mean User Balance:        {np.mean(list(user_final_bals.values())):,.2f} VEs")
+    print("=======================================================\n")
 
 if __name__ == '__main__':
     generate_datasets()

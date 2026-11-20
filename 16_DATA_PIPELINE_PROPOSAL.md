@@ -14,7 +14,7 @@ In strict adherence to the mandate (*"Do not recommend expensive infrastructure 
 - **Analytical Storage (Silver/Gold)**: PostgreSQL / DuckDB analytical marts
 - **Business Intelligence**: Metabase / Apache Superset (self-hosted / low-cost SaaS)
 
-This architecture operates efficiently at **under \$150/month in infrastructure costs** during current development phases while scaling seamlessly to millions of daily events.
+This architecture operates efficiently at **\$115/month in infrastructure costs** during Phase 1 development while scaling seamlessly to millions of daily events.
 
 ---
 
@@ -136,6 +136,36 @@ flowchart TD
 | **dbt Transformation Models**| Analytics Engineer | Senior Data Analyst | 100% test pass rate; hourly sync |
 | **Gold Dimensional Marts** | Analytics Engineer | Database Administrator | Query execution `<2.0s` |
 | **Metabase Dashboards** | Lead Data Analyst | Product Managers | 100% dashboard metric uptime |
+
+---
+
+## 6. Realistic Tiered Infrastructure Cost Breakdown
+
+To satisfy the non-negotiable principle of avoiding premature enterprise cloud overhead, the data pipeline infrastructure budget is calibrated across three realistic operational growth tiers:
+
+```
++---------------------+-----------------------+-------------------------+---------------------------------+
+| COMPONENT           | PHASE 1: MVP / DEV    | PHASE 2: EARLY GROWTH   | PHASE 3: SCALE                  |
+|                     | (0 - 50,000 DAU)      | (50,000 - 250,000 DAU)  | (250,000 - 1,000,000+ DAU)      |
+|                     | (~1M events / day)    | (~10M events / day)     | (~50M events / day)             |
++---------------------+-----------------------+-------------------------+---------------------------------+
+| Ingestion Gateway   | $20 / month           | $75 / month             | $220 / month                    |
+| (Compute)           | 2x t4g.small (FastAPI)| 3x t4g.medium + ALB     | 6x c6g.xlarge + NLB             |
+| Caching & Queue     | $15 / month           | $60 / month             | $180 / month                    |
+| (Redis / Kafka)     | Redis t4g.micro       | Redis + RabbitMQ        | Managed Kafka / Redpanda Cluster|
+| Bronze Raw Storage  | $5 / month            | $25 / month             | $95 / month                     |
+| (Object Storage)    | Cloudflare R2 (No eg.)| Cloudflare R2           | S3 Standard + Glacier Lifecycle |
+| Transformation      | $0 / month            | $40 / month             | $180 / month                    |
+| (dbt Compute)       | GitHub Actions / Cron | Dedicated dbt Worker    | Airflow on ECS                  |
+| Analytical Database | $35 / month           | $120 / month            | $350 / month                    |
+| (Silver / Gold)     | Managed PostgreSQL    | PostgreSQL (db.m6g)     | ClickHouse Distributed Cluster  |
+| BI & Visualization  | $20 / month           | $65 / month             | $125 / month                    |
+| (Metabase)          | Self-hosted on EC2    | Self-hosted t4g.medium  | Metabase Pro SaaS               |
++---------------------+-----------------------+-------------------------+---------------------------------+
+| TOTAL MONTHLY COST  | $115 / month          | $385 / month            | $1,150 / month                  |
+| COST PER 1M EVENTS  | $3.83 / million       | $1.28 / million         | $0.76 / million                 |
++---------------------+-----------------------+-------------------------+---------------------------------+
+```
 
 ---
 *Deliverable Document Reference: `docs/16_DATA_PIPELINE_PROPOSAL.md` | Architecture Blueprint.*

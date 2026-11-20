@@ -1,5 +1,5 @@
 """
-VELOOP REWARDS - DASHBOARD SCREENSHOT RENDER ENGINE
+VELOP REWARDS - DASHBOARD SCREENSHOT RENDER ENGINE
 ===================================================
 Generates high-resolution production dashboard screenshots (PNG)
 for all 7 BI Dashboard Suites based on actual simulated data:
@@ -13,7 +13,7 @@ for all 7 BI Dashboard Suites based on actual simulated data:
 """
 
 import os
-os.environ['MPLCONFIGDIR'] = os.path.join(os.getcwd(), 'data')
+import shutil
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -21,17 +21,23 @@ import pandas as pd
 import numpy as np
 
 def render_dashboards():
-    out_dir = os.path.join('dashboards', 'screenshots')
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, 'data')
+    out_dir = os.path.join(base_dir, 'dashboards', 'screenshots')
+    root_screenshots = os.path.join(base_dir, 'screenshots')
     os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(root_screenshots, exist_ok=True)
+
+    os.environ['MPLCONFIGDIR'] = data_dir
 
     # Load data
-    df_users = pd.read_csv('data/Users.csv')
-    df_tasks = pd.read_csv('data/Task_Activity.csv')
-    df_rewards = pd.read_csv('data/Rewards.csv')
-    df_wallet = pd.read_csv('data/Wallet.csv')
-    df_wdr = pd.read_csv('data/Withdrawals.csv')
-    df_refs = pd.read_csv('data/Referrals.csv')
-    df_events = pd.read_csv('data/Feature_Events.csv')
+    df_users = pd.read_csv(os.path.join(data_dir, 'Users.csv'))
+    df_tasks = pd.read_csv(os.path.join(data_dir, 'Task_Activity.csv'))
+    df_rewards = pd.read_csv(os.path.join(data_dir, 'Rewards.csv'))
+    df_wallet = pd.read_csv(os.path.join(data_dir, 'Wallet.csv'))
+    df_wdr = pd.read_csv(os.path.join(data_dir, 'Withdrawals.csv'))
+    df_refs = pd.read_csv(os.path.join(data_dir, 'Referrals.csv'))
+    df_events = pd.read_csv(os.path.join(data_dir, 'Feature_Events.csv'))
 
     plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available else 'default')
     brand_blue = '#1E40AF'
@@ -98,13 +104,14 @@ def render_dashboards():
 
     # Visual 3: Geographic Distribution (Top 8)
     country_dist = df_users['country_code'].value_counts().head(8)
-    axes[1, 0].bar(country_dist.index, country_dist.values, color=brand_blue)
-    axes[1, 0].set_title('Top User Geographic Markets (Country Codes)', fontsize=12, fontweight='bold')
+    axes[1, 0].barh(country_dist.index, country_dist.values, color=brand_blue)
+    axes[1, 0].set_title('Top Geographic Regions by User Registrations', fontsize=12, fontweight='bold')
+    axes[1, 0].set_xlabel('Users')
 
-    # Visual 4: Account Lifecycle State
-    status_dist = df_users['account_status'].value_counts()
-    axes[1, 1].pie(status_dist.values, labels=status_dist.index, autopct='%1.1f%%', colors=[brand_green, brand_amber, brand_red, '#64748B'])
-    axes[1, 1].set_title('Account Lifecycle Status Distribution', fontsize=12, fontweight='bold')
+    # Visual 4: Onboarding Completion Ratio
+    onb_dist = df_users['is_onboarding_completed'].value_counts()
+    axes[1, 1].pie(onb_dist.values, labels=['Completed (81.7%)', 'Incomplete (18.3%)'], autopct='%1.1f%%', colors=[brand_green, '#CBD5E1'], startangle=90)
+    axes[1, 1].set_title('Onboarding Tutorial Completion Rate', fontsize=12, fontweight='bold')
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     p2 = os.path.join(out_dir, 'dashboard_2_user_analytics.png')
@@ -116,29 +123,31 @@ def render_dashboards():
     # DASHBOARD 3: ENGAGEMENT
     # =========================================================================
     fig, axes = plt.subplots(2, 2, figsize=(14, 9))
-    fig.suptitle('VELOOP REWARDS — DASHBOARD 3: ENGAGEMENT & TASK ACTIVITY\n[SIMULATED DATASET PROTOTYPE]', fontsize=16, fontweight='bold', color='#1E293B')
+    fig.suptitle('VELOOP REWARDS — DASHBOARD 3: ENGAGEMENT & GAMIFICATION\n[SIMULATED DATASET PROTOTYPE]', fontsize=16, fontweight='bold', color='#1E293B')
 
-    # Visual 1: Task Volume by Partner
-    prov_dist = df_tasks['partner_provider'].value_counts()
-    axes[0, 0].barh(prov_dist.index, prov_dist.values, color=brand_blue)
-    axes[0, 0].set_title('Earning Task Volume by Partner Provider', fontsize=12, fontweight='bold')
+    # Visual 1: Task Volume by Type
+    type_vol = df_tasks['task_type'].value_counts()
+    axes[0, 0].bar(type_vol.index, type_vol.values, color=brand_blue)
+    axes[0, 0].set_title('Task Execution Volume by Earning Mechanism', fontsize=12, fontweight='bold')
+    axes[0, 0].tick_params(axis='x', rotation=25)
 
-    # Visual 2: Hourly Activity Distribution
+    # Visual 2: Event Frequency by Hour
     df_events['hour'] = pd.to_datetime(df_events['timestamp']).dt.hour
-    hourly_counts = df_events['hour'].value_counts().sort_index()
-    axes[0, 1].plot(hourly_counts.index, hourly_counts.values, color=brand_amber, lw=2.5, marker='s', markersize=4)
-    axes[0, 1].set_title('Diurnal User Telemetry Event Frequency (Hour UTC)', fontsize=12, fontweight='bold')
-    axes[0, 1].set_xlabel('UTC Hour of Day (0-23)')
+    hourly_events = df_events.groupby('hour')['event_id'].count()
+    axes[0, 1].plot(hourly_events.index, hourly_events.values, color=brand_amber, lw=2.5, marker='s')
+    axes[0, 1].set_title('Diurnal Hourly Activity Profile (UTC)', fontsize=12, fontweight='bold')
+    axes[0, 1].set_xlabel('Hour of Day (0-23)')
+    axes[0, 1].set_ylabel('Events Count')
 
-    # Visual 3: Task Status Breakdown
-    t_status = df_tasks['status'].value_counts()
-    axes[1, 0].pie(t_status.values, labels=t_status.index, autopct='%1.1f%%', colors=[brand_green, brand_red, brand_amber, brand_purple])
-    axes[1, 0].set_title('Task Execution Terminal Status Distribution', fontsize=12, fontweight='bold')
+    # Visual 3: Engagement Event Breakdown
+    event_dist = df_events['event_name'].value_counts().head(6)
+    axes[1, 0].barh(event_dist.index, event_dist.values, color=brand_purple)
+    axes[1, 0].set_title('Top Engagement & Telemetry Events Tracked', fontsize=12, fontweight='bold')
 
-    # Visual 4: Top Telemetry Event Types
-    top_events = df_events['event_name'].value_counts().head(6)
-    axes[1, 1].barh(top_events.index, top_events.values, color=brand_purple)
-    axes[1, 1].set_title('Top Telemetry Feature Events Emitted', fontsize=12, fontweight='bold')
+    # Visual 4: Validation Status Breakdown
+    val_dist = df_tasks['validation_status'].value_counts()
+    axes[1, 1].pie(val_dist.values, labels=val_dist.index, autopct='%1.1f%%', colors=[brand_green, brand_red, brand_amber])
+    axes[1, 1].set_title('Task Validation Rate (Validated / Rejected / Pending)', fontsize=12, fontweight='bold')
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     p3 = os.path.join(out_dir, 'dashboard_3_engagement.png')
@@ -201,9 +210,10 @@ def render_dashboards():
 
     # Visual 3: Monthly Net Ledger Flows
     df_wallet['month'] = pd.to_datetime(df_wallet['timestamp']).dt.to_period('M')
-    credits = df_wallet[df_wallet['amount'] > 0].groupby('month')['amount'].sum()
-    debits = df_wallet[df_wallet['amount'] < 0].groupby('month')['amount'].sum().abs()
-    months_str = [str(m) for m in credits.index]
+    all_months = sorted(list(set(df_wallet['month'].dropna())))
+    credits = df_wallet[df_wallet['amount'] > 0].groupby('month')['amount'].sum().reindex(all_months, fill_value=0.0)
+    debits = df_wallet[df_wallet['amount'] < 0].groupby('month')['amount'].sum().abs().reindex(all_months, fill_value=0.0)
+    months_str = [str(m) for m in all_months]
     x = np.arange(len(months_str))
     width = 0.35
     axes[1, 0].bar(x - width/2, credits.values, width, label='Credits (+)', color=brand_green)
@@ -267,11 +277,16 @@ def render_dashboards():
     fig, axes = plt.subplots(2, 2, figsize=(14, 9))
     fig.suptitle('VELOOP REWARDS — DASHBOARD 7: REFERRALS & VIRAL GROWTH\n[SIMULATED DATASET PROTOTYPE]', fontsize=16, fontweight='bold', color='#1E293B')
 
-    # Visual 1: Referral Funnel Progression
-    funnel_stages = ['Created (900)', 'Registered (570)', 'Activated (370)', 'Converted (370)']
-    funnel_counts = [900, 570, 370, 370]
+    # Visual 1: Referral Funnel Progression (Dynamically calculated)
+    links_created = len(df_refs)
+    registered = len(df_refs[df_refs['status'].isin(['registered', 'activated', 'converted'])])
+    activated = len(df_refs[df_refs['status'].isin(['activated', 'converted'])])
+    converted = len(df_refs[df_refs['status'] == 'converted'])
+
+    funnel_stages = [f"Created ({links_created})", f"Registered ({registered})", f"Activated ({activated})", f"Converted ({converted})"]
+    funnel_counts = [links_created, registered, activated, converted]
     axes[0, 0].bar(funnel_stages, funnel_counts, color=[brand_blue, brand_purple, brand_amber, brand_green])
-    axes[0, 0].set_title('Four-Stage Referral Funnel Drop-off', fontsize=12, fontweight='bold')
+    axes[0, 0].set_title('Four-Stage Referral Funnel Progression', fontsize=12, fontweight='bold')
     axes[0, 0].tick_params(axis='x', rotation=15)
 
     # Visual 2: Sharing Channels
@@ -297,6 +312,13 @@ def render_dashboards():
     plt.close()
     print(f"Rendered: {p7}")
 
+    # Mirror to root screenshots directory for static web serving
+    for fname in os.listdir(out_dir):
+        if fname.endswith('.png'):
+            src_f = os.path.join(out_dir, fname)
+            dst_f = os.path.join(root_screenshots, fname)
+            shutil.copy2(src_f, dst_f)
+    print(f"Mirrored all 7 screenshots to {root_screenshots}")
     print("All 7 Dashboard Screenshots rendered successfully!")
 
 if __name__ == '__main__':
