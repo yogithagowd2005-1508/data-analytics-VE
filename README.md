@@ -167,7 +167,7 @@ https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_2_
 ---
 
 ### 3. Engagement & Gamification Dashboard
-![Engagement Dashboard](dashboards/screenshots/dashboard_3_engagement.png)
+https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/dashboard_3_engagement.png
 * **Target Audience**: Gamification PM, Game Economy Designer
 * **Key Metrics**: Started Tasks (`6,000`), Completion Rate (`72.6%`), Daily Streak Claims (`2,685`), Avg Tasks / User (`4.75`)
 * **Visuals**: Earning Feature Category Breakdown (Video Ads, Surveys, Tap & Earn, Mining), Hourly Engagement Heatmap, Abandonment Taxonomy
