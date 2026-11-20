@@ -126,7 +126,7 @@ Over a structured 25-day product analytics methodology, this project establishes
 4. **Empirical Relationship & Referential Testing (9 FK Paths)**:
    - Validated all **9 foreign-key paths** across 30,150 total records (34,597 referential checks). **100% clean referential integrity** (0 orphans) achieved across all production-simulated tables.
    - Negative control audit on `Messy_Data` successfully detected and quarantined **45 orphan rows** across 10 distinct non-existent user IDs.
-   - Comprehensive documentation in [FOREIGN_KEY_VALIDATION_REPORT.md](docs/FOREIGN_KEY_VALIDATION_REPORT.md).
+   - Comprehensive documentation in https://github.com/yogithagowd2005-1508/data-analytics-VE/blob/main/FOREIGN_KEY_VALIDATION_REPORT.md.
 5. **Wallet Ledger & Withdrawal Reconciliation Engine (Zero Overdrafts & Positive Float)**:
    - Re-engineered the synthetic balance generator to strictly bound user withdrawals and debits to available earned balances.
    - User Opening Balance: `0.00 VEs` across all 1,000 accounts; Minimum User Balance: `0.00 VEs` (zero negative balances).
